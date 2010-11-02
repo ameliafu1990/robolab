@@ -1,0 +1,1 @@
+"java" soccorob.SoccoRob -simulator -init c:\programs\RoboLab\settings\init2.txt -teamname Opponents
