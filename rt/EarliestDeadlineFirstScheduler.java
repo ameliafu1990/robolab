@@ -125,6 +125,8 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     AbsoluteTime nextReleaseTime = new AbsoluteTime();
     RelativeTime sleepTime = new RelativeTime();
 	
+    AbsoluteTime debugTime = new AbsoluteTime();
+    
     RMThreadNode readyThreadNode;
     RLThread readyThread;
 	
@@ -142,22 +144,31 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     		   !(((RMThreadNode)suspendedList.getFirst()).nextRelease.isGreater(absTime))) {
     		suspendedThreadNode = (RMThreadNode) suspendedList.removeFirst();
     		suspendedThread = suspendedThreadNode.thread;
-    		System.out.println("Release task: " + suspendedThread.getName() + 
+    		
+
+	    	HighResolutionClock.getTime(debugTime);
+	    	System.out.println(debugTime.toString() + " Release: " + suspendedThread.getName() + " , Deadline: " + suspendedThreadNode.deadline.toString());
+    		
+/*    		System.out.println("Release task: " + suspendedThread.getName() + 
 					" Time: " + absTime.toString() + 
 					" Release time: " + suspendedThreadNode.nextRelease.toString() +
-					" Deadline: " + suspendedThreadNode.deadline.toString());
+					" Deadline: " + suspendedThreadNode.deadline.toString()); */
     		suspendedThread.setReady();
     		readyList.insert(suspendedThreadNode);
     	}
     	
-    	System.out.println("Ready list: " + readyList.toString());
-    	
     	/* Reschedule tasks with missed deadlines */
     	while ((!(readyList.isEmpty())) && 
     			(!(((RMThreadNode) readyList.getFirst()).deadline.isGreater(absTime)))) {
-    		System.out.println("Missed deadline: " + readyList.getFirst().thread.getName() + 
+    		
+
+	    	HighResolutionClock.getTime(debugTime);
+	    	System.out.println(debugTime.toString() + " Missed: " + readyList.getFirst().thread.getName() + 
+	    			" , Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString());
+    		
+  /*  		System.out.println("Missed deadline: " + readyList.getFirst().thread.getName() + 
     							" Time: " + absTime.toString() + 
-    							" Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString());
+    							" Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString()); */
     		((RMThreadNode) readyList.getFirst()).thread.getDeadlineMissHandler().handleAsyncEvent();
     		rescheduleFirst(nextReleaseTime);
     	}
@@ -167,13 +178,31 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
 	    	
 	    	readyThreadNode = (RMThreadNode) readyList.getFirst();
 	    	readyThread = readyThreadNode.thread;
+	    	
+	    	HighResolutionClock.getTime(debugTime);
+	    	System.out.println(debugTime.toString() + " Start: " + readyThread.getName());
+	    	
 	       	fireThread(readyThread);
+	       	
+	    	HighResolutionClock.getTime(debugTime);
+	    	System.out.println(debugTime.toString() + " Stop: " + readyThread.getName());
 	       	
 	       	/* Task running... */
 	    	
+	       	
+	       	
 	    	/* Reschedule if finished. */
 	    	if (readyThread.isFinished()) {
-	    		System.out.println("Task finished: " + readyThread.getName());
+	    		
+	    		
+
+		    	HighResolutionClock.getTime(debugTime);
+		    	System.out.println(" Finished ");
+	    		
+	    		
+	    		/*System.out.println("Task finished: " + readyThread.getName() + 
+						" Time: " + absTime.toString() + 
+						" Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString()); */
 	    		rescheduleFirst(nextReleaseTime);
 	    	}
     	
