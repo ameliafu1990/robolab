@@ -1,4 +1,4 @@
-// Author(s): (Put your name here)
+// Author(s): Mikael Rothin (mikro464), Johan Uppman (johup261)
 // Notes:     
 
 package rt;
@@ -13,7 +13,7 @@ public class CyclicScheduler extends BaseCyclicScheduler {
   private RLThread[] threadList;
 	
   public CyclicScheduler() {
-    /* Don't wait until JIT optimises execution*/
+    /* Don't wait until JIT optimizes execution*/
     super(false);
 
     System.out.println("Cyclic scheduler initiated");
@@ -51,8 +51,9 @@ public class CyclicScheduler extends BaseCyclicScheduler {
 
   public void start() {
       
-    /* Minor and major cycles should be initialised here ... */ 
-
+    /* Minor and major cycles should be initialized here ... */ 
+	setMinorCycle(new RelativeTime(0, 0, 50000));
+	setMajorCycle(new RelativeTime(0, 1, 0));
     
     /* Next code signals to the infrastructure the start time of this
        Scheduler */
@@ -62,16 +63,32 @@ public class CyclicScheduler extends BaseCyclicScheduler {
     
     while (true) {			
 	    
-      /* Minor cycle 1 */
-	    
+      /* Minor cycle 1-3 */
+    	for (int c = 1; c <= 3; c ++) {
+		    fireUntilFinished(threadList[0]);
+		    fireThread(threadList[1]);
+		    fireThread(threadList[1]);
+		    fireThread(threadList[2]);
+		    fireThread(threadList[2]);
+		    fireThread(threadList[3]);
+		    fireThread(threadList[3]);
+		    fireUntilFinished(threadList[4]);
+		    fireUntilFinished(threadList[5]);
+		    fireUntilFinished(threadList[6]);
+		    fireUntilFinished(threadList[7]);
+	    	waitForCycleInterrupt();
+    	}
 	   
-	    
-      /* Minor cycle 2 */
-	   
-						
-      /*     ...       */
-	    
-      
+      /* Minor cycle 4-20 */
+    	for (int c = 4; c <= 20; c ++) {
+		    fireUntilFinished(threadList[0]);
+		    fireUntilFinished(threadList[4]);
+		    fireUntilFinished(threadList[5]);
+		    fireUntilFinished(threadList[6]);
+		    fireUntilFinished(threadList[7]);
+	    	waitForCycleInterrupt();
+    	}
+    	
     }	
   }
 }
