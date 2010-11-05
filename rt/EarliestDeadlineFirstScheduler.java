@@ -20,6 +20,8 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
 	
   private EarliestDeadlineSortedList readyList;
   private EarliestReleaseSortedList  suspendedList;
+  
+  private int actuatorID;
 	
   
   public EarliestDeadlineFirstScheduler() { 
@@ -55,6 +57,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     }
     //System.out.println(readyList.toString());
     
+    actuatorID = threadList[7].getID();
   }
 		
   public String getPolicyName() {
@@ -201,9 +204,12 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
 	    	HighResolutionClock.getTime(debugTime2);
 	    	
 	    	debugTime2.subtract(debugTime, debugTimeTaken);
-	    	if (debugTimeTaken.isGreater(debugToLongTime)) {
+	    	//if (debugTimeTaken.isGreater(debugToLongTime)) {
+	    	if (readyThread.getID() == actuatorID) {
 	    		System.out.println(debugTimeTaken.toString() + " Task: " + readyThread.getName());
 	    	}
+	    	
+	    	
 	    	//System.out.println(debugTime.toString() + " Start: " + readyThread.getName());
 	    	//System.out.println(debugTime2.toString() + " Stop: " + readyThread.getName());
 	    	
