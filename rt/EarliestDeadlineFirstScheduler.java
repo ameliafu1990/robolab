@@ -54,6 +54,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
       
     }
     //System.out.println(readyList.toString());
+    
   }
 		
   public String getPolicyName() {
@@ -125,8 +126,10 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     AbsoluteTime nextReleaseTime = new AbsoluteTime();
     RelativeTime sleepTime = new RelativeTime();
 	
-    //AbsoluteTime debugTime = new AbsoluteTime();
-    //AbsoluteTime debugTime2 = new AbsoluteTime();
+    AbsoluteTime debugTime = new AbsoluteTime();
+    AbsoluteTime debugTime2 = new AbsoluteTime();
+    RelativeTime debugTimeTaken = new RelativeTime();
+    RelativeTime debugToLongTime = new RelativeTime(0, 0, 20000);
     
     RMThreadNode readyThreadNode;
     RLThread readyThread;
@@ -189,13 +192,18 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
 	    	readyThreadNode = (RMThreadNode) readyList.getFirst();
 	    	readyThread = readyThreadNode.thread;
 	    	
-	    	//HighResolutionClock.getTime(debugTime);
+	    	HighResolutionClock.getTime(debugTime);
 	    	
-	       	fireThread(readyThread);
+	    	fireThread(readyThread);
 	       	
 	       	/* Task running... */
 	       	
-	    	//HighResolutionClock.getTime(debugTime2);
+	    	HighResolutionClock.getTime(debugTime2);
+	    	
+	    	debugTime2.subtract(debugTime, debugTimeTaken);
+	    	if (debugTimeTaken.isGreater(debugToLongTime)) {
+	    		System.out.println(debugTimeTaken.toString() + " Task: " + readyThread.getName());
+	    	}
 	    	//System.out.println(debugTime.toString() + " Start: " + readyThread.getName());
 	    	//System.out.println(debugTime2.toString() + " Stop: " + readyThread.getName());
 	    	
@@ -222,7 +230,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     	counter++;
     	if (counter == 200) {
     		counter = 0;
-    		System.out.println("Miss ratio: " + failedThreads/(failedThreads+finishedThreads));
+    		//System.out.println("Miss ratio: " + failedThreads/(failedThreads+finishedThreads));
     	}
     }
   }
