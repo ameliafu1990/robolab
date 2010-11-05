@@ -125,19 +125,27 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     AbsoluteTime nextReleaseTime = new AbsoluteTime();
     RelativeTime sleepTime = new RelativeTime();
 	
-    AbsoluteTime debugTime = new AbsoluteTime();
+    //AbsoluteTime debugTime = new AbsoluteTime();
+    //AbsoluteTime debugTime2 = new AbsoluteTime();
     
     RMThreadNode readyThreadNode;
     RLThread readyThread;
 	
     RMThreadNode suspendedThreadNode;
     RLThread suspendedThread;
+    
+    int missedDeadlines;
+    
+    int counter = 0;
+    double failedThreads = 0;
+    double finishedThreads = 0;
 	
     /* Initialize the clock */
     HighResolutionClock.resetClock();
 		
     while (true) {
     	HighResolutionClock.getTime(absTime);
+    	missedDeadlines = 0;
 
     	/* Move threads to ready queue. */
     	while (!(suspendedList.isEmpty()) && 
@@ -146,8 +154,8 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     		suspendedThread = suspendedThreadNode.thread;
     		
 
-	    	HighResolutionClock.getTime(debugTime);
-	    	System.out.println(debugTime.toString() + " Release: " + suspendedThread.getName() + " , Deadline: " + suspendedThreadNode.deadline.toString());
+	    	//HighResolutionClock.getTime(debugTime);
+	    	//System.out.println(debugTime.toString() + " Release: " + suspendedThread.getName() + " , Deadline: " + suspendedThreadNode.deadline.toString());
     		
 /*    		System.out.println("Release task: " + suspendedThread.getName() + 
 					" Time: " + absTime.toString() + 
@@ -162,54 +170,59 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     			(!(((RMThreadNode) readyList.getFirst()).deadline.isGreater(absTime)))) {
     		
 
-	    	HighResolutionClock.getTime(debugTime);
-	    	System.out.println(debugTime.toString() + " Missed: " + readyList.getFirst().thread.getName() + 
-	    			" , Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString());
+	    	//HighResolutionClock.getTime(debugTime);
+	    	//System.out.println(debugTime.toString() + " Missed: " + readyList.getFirst().thread.getName() + 
+	    	//		" , Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString());
     		
   /*  		System.out.println("Missed deadline: " + readyList.getFirst().thread.getName() + 
     							" Time: " + absTime.toString() + 
     							" Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString()); */
     		((RMThreadNode) readyList.getFirst()).thread.getDeadlineMissHandler().handleAsyncEvent();
     		rescheduleFirst(nextReleaseTime);
+    		missedDeadlines = 1;
+    		failedThreads++;
     	}
     	
     	/* Run task with closest deadline. */
-    	if (!(readyList.isEmpty())) {
+    	if ((!(readyList.isEmpty())) & missedDeadlines == 0) {
 	    	
 	    	readyThreadNode = (RMThreadNode) readyList.getFirst();
 	    	readyThread = readyThreadNode.thread;
 	    	
-	    	HighResolutionClock.getTime(debugTime);
-	    	System.out.println(debugTime.toString() + " Start: " + readyThread.getName());
+	    	//HighResolutionClock.getTime(debugTime);
 	    	
 	       	fireThread(readyThread);
 	       	
-	    	HighResolutionClock.getTime(debugTime);
-	    	System.out.println(debugTime.toString() + " Stop: " + readyThread.getName());
-	       	
 	       	/* Task running... */
+	       	
+	    	//HighResolutionClock.getTime(debugTime2);
+	    	//System.out.println(debugTime.toString() + " Start: " + readyThread.getName());
+	    	//System.out.println(debugTime2.toString() + " Stop: " + readyThread.getName());
 	    	
 	       	
 	       	
 	    	/* Reschedule if finished. */
 	    	if (readyThread.isFinished()) {
 	    		
-	    		
-
-		    	HighResolutionClock.getTime(debugTime);
-		    	System.out.println(" Finished ");
+		    	//System.out.println(" Finished ");
 	    		
 	    		
 	    		/*System.out.println("Task finished: " + readyThread.getName() + 
 						" Time: " + absTime.toString() + 
 						" Deadline: " + ((RMThreadNode) readyList.getFirst()).deadline.toString()); */
 	    		rescheduleFirst(nextReleaseTime);
+	    		finishedThreads++;
 	    	}
     	
-    	} else {
+    	} else if (missedDeadlines == 0) {
     		((RMThreadNode) suspendedList.getFirst()).nextRelease.subtract(absTime, sleepTime);
-    		System.out.println("sleeping: " + sleepTime.toString());
+    		//System.out.println("sleeping: " + sleepTime.toString());
         	this.sleep(sleepTime);
+    	}
+    	counter++;
+    	if (counter == 200) {
+    		counter = 0;
+    		System.out.println("Miss ratio: " + failedThreads/(failedThreads+finishedThreads));
     	}
     }
   }
