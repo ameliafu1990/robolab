@@ -236,7 +236,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     	counter++;
     	if (counter == 200) {
     		counter = 0;
-    		//System.out.println("Miss ratio: " + failedThreads/(failedThreads+finishedThreads));
+    		System.out.println("Miss ratio: " + failedThreads/(failedThreads+finishedThreads));
     	}
     }
   }
