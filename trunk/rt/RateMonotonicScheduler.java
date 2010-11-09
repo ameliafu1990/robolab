@@ -15,25 +15,25 @@ import soccorob.ai.agent.*;
 /**
  * Earliest First Deadline Scheduler.
  */
-public class EarliestDeadlineFirstScheduler extends Scheduler{
+public class RateMonotonicScheduler extends Scheduler{
 	
 	
-  private EarliestDeadlineSortedList readyList;
+  private PrioritySortedList readyList;
   private EarliestReleaseSortedList  suspendedList;
-	
   
-  public EarliestDeadlineFirstScheduler() { 
+  
+  public RateMonotonicScheduler() { 
 	
-    /* Don't wait until JIT optimises execution*/
+    /* Don't wait until JIT optimizes execution*/
     super(false);		
 		
-    System.out.println("Earliest Deadline First scheduler initiated.");
+    System.out.println("Rate-monotonic scheduler initiated.");
 	
     RLThread[] threadList = (RLThread[]) getThreads(); 
     RMThreadNode threadNode;
 		
-    /* Create a new ready list. Sorted with respect to earliest deadline. */
-    readyList = new EarliestDeadlineSortedList();
+    /* Create a new ready list. Sorted with respect to shortest period. */
+    readyList = new PrioritySortedList();
 		
     /* Create a new suspended list. Sorted with respect to earliest release time. */
     suspendedList = new EarliestReleaseSortedList();	
@@ -48,7 +48,13 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
       /* set the first deadline */
       threadNode.nextRelease.add(threadNode.thread.getReleaseParameters().getDeadline(),
 				 threadNode.deadline);
-			
+      
+      /* Set priority = period. */
+      threadNode.thread.setSchedulingParameters(new PriorityParameters(2147483647 -													//Number is the biggest integer
+    		  				((PeriodicParameters) threadNode.thread.getReleaseParameters()).getPeriod().getMicroSeconds() + 
+    		  				1000000*((PeriodicParameters) threadNode.thread.getReleaseParameters()).getPeriod().getSeconds() + 
+    		  				60*1000000*((PeriodicParameters) threadNode.thread.getReleaseParameters()).getPeriod().getMinutes()));
+      
       /* Insert into suspended list */
       suspendedList.insert(threadNode);
       
@@ -57,7 +63,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
   }
 		
   public String getPolicyName() {
-    return "Earliest Deadline First";
+    return "Shortest Period First";
   }
     
   public boolean isFeasible() {
@@ -167,7 +173,7 @@ public class EarliestDeadlineFirstScheduler extends Scheduler{
     		failedThreads += missedDeadlines;
     	}
     	
-    	/* Run task with closest deadline. */
+    	/* Run task with shortest period. */
     	if ((!(readyList.isEmpty())) & missedDeadlines == 0) {	//Run task if no releasing needs to be done due to missed deadlines.
 	    	
 	    	readyThreadNode = (RMThreadNode) readyList.getFirst();
