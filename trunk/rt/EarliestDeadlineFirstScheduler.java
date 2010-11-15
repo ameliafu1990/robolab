@@ -1,5 +1,4 @@
-// Author(s): (Put your name here)
-// Notes:     
+// Author(s): Mikael Rothin (mikro464), Johan Uppman (johup261)   
 
 
 package rt;

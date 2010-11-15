@@ -1,5 +1,4 @@
-// Author(s): Mikael Rothin (mikro464), Johan Uppman (johup261)
-// Notes:     
+// Author(s): Mikael Rothin (mikro464), Johan Uppman (johup261)   
 
 package rt;
 
